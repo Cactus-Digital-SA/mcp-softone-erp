@@ -1,0 +1,21 @@
+{
+  "name": "mcp-softone",
+  "version": "1.0.0",
+  "main": "softone-erp-server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "type": "module",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.9.0",
+    "zod": "^3.25.28"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0"
+  }
+}
+
