@@ -541,15 +541,15 @@ Provide a comprehensive financial analysis with key insights and recommendations
     })
 );
 
-// Start the server
+/*// Start the server
 console.log("🚀 Starting MCP SoftOne ERP Server v1.0.0");
 console.log("📄 License: Dual License (Non-Commercial Free / Commercial Paid)");
-console.log("💼 Commercial use requires a paid license - Contact: your.email@example.com");
+console.log("💼 Commercial use requires a paid license - Contact: dimitris@cactusweb.gr");
 console.log("📚 For licensing details, see: LICENSE and COMMERCIAL-LICENSE.md");
-console.log("🌐 Visit: https://your-website.com/commercial-license");
-console.log("🔍 License checker: npx mcp-softone-license-check");
+console.log("🌐 Visit: https://www.cactusweb.gr");
+console.log("🔍 License checker: npx softone-erp-license-check");
 console.log("📊 Analytics: Set DISABLE_ANALYTICS=true to opt out");
-console.log("---");
+console.log("---");*/
 
 // Track startup for license compliance (optional, can be disabled)
 await analytics.trackStartup();

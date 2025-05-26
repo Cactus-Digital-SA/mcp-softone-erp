@@ -1,4 +1,4 @@
-# MCP SoftOne ERP Server
+# MCP SoftOne ERP Server (@cactus-digital-sa/mcp-softone-erp)
 
 A Model Context Protocol (MCP) server for integrating with SoftOne ERP API, providing comprehensive ERP data access and analysis capabilities.
 
@@ -15,19 +15,19 @@ A Model Context Protocol (MCP) server for integrating with SoftOne ERP API, prov
 
 ### Using npx (Recommended)
 ```bash
-npx mcp-softone-erp
+npx @cactus-digital-sa/mcp-softone-erp
 ```
 
 ### Global Installation
 ```bash
-npm install -g mcp-softone-erp
+npm install -g @cactus-digital-sa/mcp-softone-erp
 ```
 
 ## Usage
 
 ### Starting the Server
 ```bash
-npx mcp-softone-erp
+npx @cactus-digital-sa/mcp-softone-erp
 ```
 
 ### Authentication
@@ -180,7 +180,7 @@ This software includes optional, anonymous usage analytics to help identify pote
 ```bash
 export DISABLE_ANALYTICS=true
 # or
-DISABLE_ANALYTICS=true npx mcp-softone-erp
+DISABLE_ANALYTICS=true npx @mcp-servers/softone-erp
 ```
 
 All analytics help us understand usage patterns while maintaining your privacy and helping ensure license compliance.
@@ -209,10 +209,10 @@ Not sure if you need a commercial license? Use our compliance checker:
 
 ```bash
 # After installing the package
-npx mcp-softone-license-check
+npx softone-erp-license-check
 
 # Or if installed globally
-mcp-softone-license-check
+softone-erp-license-check
 ```
 
 This interactive tool will help you determine if your usage requires a commercial license.

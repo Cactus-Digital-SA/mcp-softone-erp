@@ -1,4 +1,4 @@
-# Commercial License for MCP SoftOne ERP Server
+# Commercial License for @mcp-servers/softone-erp
 
 ## Overview
 

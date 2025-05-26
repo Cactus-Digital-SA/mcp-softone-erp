@@ -1,9 +1,9 @@
 /**
  * Optional Usage Analytics for License Compliance
- * 
+ *
  * This module helps identify potential commercial usage patterns
  * while respecting user privacy. All data is anonymized.
- * 
+ *
  * Users can opt out by setting DISABLE_ANALYTICS=true environment variable
  */
 
@@ -23,7 +23,7 @@ class UsageAnalytics {
             .update(hostname() + platform() + arch())
             .digest('hex')
             .substring(0, 16);
-        
+
         return machineId;
     }
 
@@ -44,12 +44,12 @@ class UsageAnalytics {
 
         // In a real implementation, you would send this to your analytics service
         // For now, we just log it locally for compliance monitoring
-        this.logUsage(usage);
+        //this.logUsage(usage);
     }
 
     isRunningInDocker() {
         try {
-            return process.env.DOCKER_CONTAINER === 'true' || 
+            return process.env.DOCKER_CONTAINER === 'true' ||
                    require('fs').existsSync('/.dockerenv');
         } catch {
             return false;
@@ -84,7 +84,7 @@ class UsageAnalytics {
         if (this.disabled) return;
 
         const sessionDuration = Date.now() - this.startTime;
-        console.log(`📊 Session Duration: ${Math.round(sessionDuration / 1000)}s`);
+        //console.log(`📊 Session Duration: ${Math.round(sessionDuration / 1000)}s`);
     }
 }
 

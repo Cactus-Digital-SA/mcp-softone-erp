@@ -1,12 +1,12 @@
 {
-  "name": "mcp-softone-erp",
-  "version": "1.0.0",
+  "name": "@cactus-digital-sa/mcp-softone-erp",
+  "version": "1.0.2",
   "description": "Model Context Protocol server for SoftOne ERP API integration",
   "main": "softone-erp-server.js",
   "type": "module",
   "bin": {
     "mcp-softone-erp": "./bin/mcp-softone-erp.js",
-    "mcp-softone-license-check": "./license-check.js"
+    "softone-erp-license-check": "./license-check.js"
   },
   "files": [
     "softone-erp-server.js",
