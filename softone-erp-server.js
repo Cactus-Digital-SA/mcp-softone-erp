@@ -32,17 +32,10 @@ function convertFromWindows1253(text) {
     if (typeof text !== 'string') return text;
 
     try {
-        // Check if the text contains Greek characters that might be incorrectly encoded
-        // Convert from Windows-1253 to UTF-8 (equivalent to PHP's iconv)
-
-        // First, try to detect if the string is already UTF-8 or needs conversion
-        if (isValidUtf8(text)) {
-            return text; // Already UTF-8
-        }
-
+        // SoftOne ERP sends Windows-1253 encoded text
+        // We receive it as bytes represented in latin1 encoding
         // Convert from Windows-1253 to UTF-8
-        const buffer = Buffer.from(text, 'binary');
-        return iconv.decode(buffer, 'win1253');
+        return iconv.decode(Buffer.from(text, 'latin1'), 'win1253');
     } catch (error) {
         console.warn('Character encoding conversion failed:', error.message);
         return text; // Return original text if conversion fails
@@ -93,61 +86,19 @@ async function callSoftOneApi(method, params = {}) {
             clientID: method !== "login" ? clientID : undefined,
             appId,
             ...params
-        }, {
-            // Configure axios to handle encoding properly
-            responseType: 'text',
-            responseEncoding: 'binary', // Get raw binary data first
-            transformResponse: [(data) => {
-                try {
-                    // Convert from Windows-1253 to UTF-8 at the HTTP response level
-                    const utf8Data = iconv.decode(Buffer.from(data, 'binary'), 'win1253');
-                    return JSON.parse(utf8Data);
-                } catch (parseError) {
-                    // If JSON parsing fails, try parsing the original data
-                    try {
-                        return JSON.parse(data);
-                    } catch (originalParseError) {
-                        console.warn('Failed to parse response as JSON:', originalParseError.message);
-                        return data; // Return raw data if JSON parsing fails
-                    }
-                }
-            }]
         });
 
         if (!response.data.success && response.data.error) {
             throw new Error(`SoftOne API Error: ${response.data.error}`);
         }
 
-        // Additional conversion for any remaining encoding issues
+        // Convert character encoding from Windows-1253 to UTF-8
         const convertedData = convertResponseEncoding(response.data);
 
         console.log('📥 SoftOne API Response (UTF-8 converted):', method);
 
         return convertedData;
     } catch (error) {
-        // If the custom encoding fails, try the standard approach
-        if (error.message.includes('JSON') || error.message.includes('parse')) {
-            try {
-                console.log('🔄 Retrying with standard encoding...');
-                const fallbackResponse = await axios.post(`${erpApiBaseUrl}/s1services`, {
-                    service: method,
-                    clientID: method !== "login" ? clientID : undefined,
-                    appId,
-                    ...params
-                });
-
-                if (!fallbackResponse.data.success && fallbackResponse.data.error) {
-                    throw new Error(`SoftOne API Error: ${fallbackResponse.data.error}`);
-                }
-
-                // Apply encoding conversion to the standard response
-                const convertedData = convertResponseEncoding(fallbackResponse.data);
-                return convertedData;
-            } catch (fallbackError) {
-                throw new Error(`SoftOne API Error: ${fallbackError.message}`);
-            }
-        }
-
         throw new Error(`SoftOne API Error: ${error.message}`);
     }
 }
@@ -429,7 +380,7 @@ server.tool("debugEncoding",
     },
     async ({ testString }) => {
         try {
-            const originalBytes = Buffer.from(testString, 'binary');
+            const originalBytes = Buffer.from(testString, 'latin1');
             const convertedUtf8 = iconv.decode(originalBytes, 'win1253');
 
             return {
@@ -440,7 +391,8 @@ server.tool("debugEncoding",
                         originalBytes: Array.from(originalBytes),
                         convertedUtf8: convertedUtf8,
                         isValidUtf8Original: isValidUtf8(testString),
-                        isValidUtf8Converted: isValidUtf8(convertedUtf8)
+                        isValidUtf8Converted: isValidUtf8(convertedUtf8),
+                        conversionSuccess: testString !== convertedUtf8 ? 'Converted' : 'No change needed'
                     }, null, 2)
                 }]
             };
@@ -674,8 +626,8 @@ Provide a comprehensive financial analysis with key insights and recommendations
     })
 );
 
-/*// Start the server
-console.log("🚀 Starting MCP SoftOne ERP Server v1.0.0");
+// Start the server
+/*console.log("🚀 Starting MCP SoftOne ERP Server v1.0.0");
 console.log("📄 License: Dual License (Non-Commercial Free / Commercial Paid)");
 console.log("💼 Commercial use requires a paid license - Contact: dimitris@cactusweb.gr");
 console.log("📚 For licensing details, see: LICENSE and COMMERCIAL-LICENSE.md");

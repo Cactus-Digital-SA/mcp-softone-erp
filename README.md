@@ -82,12 +82,20 @@ This ensures proper display of Greek characters in customer names, addresses, pr
 ### Testing Encoding
 You can test the encoding conversion with:
 ```bash
+# Basic encoding test
+npm run test-encoding
+
+# Real-world SoftOne ERP encoding test  
+npm run test-encoding-real
+
+# Or run directly
 node encoding-test.js
+node real-world-encoding-test.js
 ```
 
 Or use the debug tool:
 ```javascript
-await debugEncoding({ testString: "Πελάτης" });
+await debugEncoding({ testString: "Test Greek text from SoftOne" });
 ```
 
 ### Available Resources
