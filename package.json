@@ -1,21 +1,55 @@
 {
-  "name": "mcp-softone",
+  "name": "mcp-softone-erp",
   "version": "1.0.0",
+  "description": "Model Context Protocol server for SoftOne ERP API integration",
   "main": "softone-erp-server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
   "type": "module",
-  "license": "ISC",
-  "description": "",
+  "bin": {
+    "mcp-softone-erp": "./bin/mcp-softone-erp.js",
+    "mcp-softone-license-check": "./license-check.js"
+  },
+  "files": [
+    "softone-erp-server.js",
+    "bin/",
+    "resources/",
+    "README.md",
+    "LICENSE",
+    "COMMERCIAL-LICENSE.md",
+    "license-check.js",
+    "usage-analytics.js"
+  ],
+  "scripts": {
+    "start": "node softone-erp-server.js",
+    "license-check": "node license-check.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublishOnly": "echo \"Preparing for publish...\""
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "softone",
+    "erp",
+    "api",
+    "integration",
+    "business",
+    "accounting"
+  ],
+  "author": "Cactus Digital SA <dimitris@cactusweb.gr>",
+  "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
     "axios": "^1.9.0",
     "zod": "^3.25.28"
   },
-  "devDependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.0"
-  }
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Cactus-Digital-SA/mcp-softone-erp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Cactus-Digital-SA/mcp-softone-erp/issues"
+  },
+  "homepage": "https://github.com/Cactus-Digital-SA/mcp-softone-erp#readme"
 }
-

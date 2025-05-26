@@ -5,10 +5,11 @@ import axios from "axios";
 import fs from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { analytics } from "./usage-analytics.js";
 
 // Get the current directory
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const resourcesDir = join(__dirname, '..', 'mcp-softone/resources');
+const resourcesDir = join(__dirname, 'resources');
 
 // Read the blackbook content and SQL schema
 const blackbookContent = fs.readFileSync(join(resourcesDir, "blackbook.md"), "utf8");
@@ -63,9 +64,10 @@ server.resource(
     })
 );
 
+// Expose S1Schema SQL as a resource
 server.resource(
-    "s1revival-schema",
-    "s1revival://database-schema",
+    "s1schema",
+    "s1schema://database-schema",
     async (uri) => ({
         contents: [{
             uri: uri.href,
@@ -288,86 +290,6 @@ server.tool("getBrowserData",
     }
 );
 
-// Get report info
-server.tool("getReportInfo",
-    {
-        object: z.string().describe("SoftOne Report Object Name"),
-        list: z.string().describe("Report Name"),
-        filters: z.string().optional().describe("Filter criteria")
-    },
-    async ({ object, list, filters = "" }) => {
-        try {
-            const response = await callSoftOneApi("getReportInfo", {
-                object,
-                list,
-                filters
-            });
-            return {
-                content: [{ type: "text", text: JSON.stringify(response, null, 2) }]
-            };
-        } catch (error) {
-            return {
-                content: [{ type: "text", text: error.message }],
-                isError: true
-            };
-        }
-    }
-);
-
-// Get report data
-server.tool("getReportData",
-    {
-        reqID: z.string().describe("Reference ID from getReportInfo"),
-        pagenum: z.number().describe("Page number")
-    },
-    async ({ reqID, pagenum }) => {
-        try {
-            const response = await callSoftOneApi("getReportData", {
-                reqID,
-                pagenum
-            });
-            return {
-                content: [{ type: "text", text: JSON.stringify(response, null, 2) }]
-            };
-        } catch (error) {
-            return {
-                content: [{ type: "text", text: error.message }],
-                isError: true
-            };
-        }
-    }
-);
-
-// DATA MODIFICATION TOOLS
-
-// Set data (insert or update)
-server.tool("setData",
-    {
-        object: z.string().describe("SoftOne Object Name"),
-        objectparams: z.record(z.any()).optional().describe("Object parameters"),
-        key: z.union([z.string(), z.number()]).optional().describe("Primary key (leave empty for new record)"),
-        data: z.record(z.array(z.record(z.any()))).describe("Data structure with tables and fields")
-    },
-    async ({ object, objectparams, key, data }) => {
-        try {
-            const response = await callSoftOneApi("setData", {
-                object,
-                objectparams,
-                key,
-                data
-            });
-            return {
-                content: [{ type: "text", text: JSON.stringify(response, null, 2) }]
-            };
-        } catch (error) {
-            return {
-                content: [{ type: "text", text: error.message }],
-                isError: true
-            };
-        }
-    }
-);
-
 // Calculate fields
 server.tool("calculate",
     {
@@ -383,32 +305,6 @@ server.tool("calculate",
                 key,
                 locateinfo,
                 data
-            });
-            return {
-                content: [{ type: "text", text: JSON.stringify(response, null, 2) }]
-            };
-        } catch (error) {
-            return {
-                content: [{ type: "text", text: error.message }],
-                isError: true
-            };
-        }
-    }
-);
-
-// Delete data
-server.tool("delData",
-    {
-        object: z.string().describe("SoftOne Object Name"),
-        form: z.string().optional().describe("Form Name"),
-        key: z.number().describe("Primary key of the record to delete")
-    },
-    async ({ object, form = "", key }) => {
-        try {
-            const response = await callSoftOneApi("delData", {
-                object,
-                form,
-                key
             });
             return {
                 content: [{ type: "text", text: JSON.stringify(response, null, 2) }]
@@ -646,5 +542,17 @@ Provide a comprehensive financial analysis with key insights and recommendations
 );
 
 // Start the server
+console.log("🚀 Starting MCP SoftOne ERP Server v1.0.0");
+console.log("📄 License: Dual License (Non-Commercial Free / Commercial Paid)");
+console.log("💼 Commercial use requires a paid license - Contact: your.email@example.com");
+console.log("📚 For licensing details, see: LICENSE and COMMERCIAL-LICENSE.md");
+console.log("🌐 Visit: https://your-website.com/commercial-license");
+console.log("🔍 License checker: npx mcp-softone-license-check");
+console.log("📊 Analytics: Set DISABLE_ANALYTICS=true to opt out");
+console.log("---");
+
+// Track startup for license compliance (optional, can be disabled)
+await analytics.trackStartup();
+
 const transport = new StdioServerTransport();
 await server.connect(transport);
