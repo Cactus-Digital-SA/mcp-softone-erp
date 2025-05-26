@@ -86,18 +86,37 @@ async function callSoftOneApi(method, params = {}) {
             clientID: method !== "login" ? clientID : undefined,
             appId,
             ...params
+        }, {
+            // Configure Axios to handle Windows-1253 properly
+            responseType: 'arraybuffer', // Get raw bytes
+            decompress: true, // Let Axios handle gzip decompression
+            transformResponse: [(data) => {
+                try {
+                    // Convert arraybuffer to Buffer
+                    const buffer = Buffer.from(data);
+
+                    // Decode Windows-1253 to UTF-8
+                    const utf8String = iconv.decode(buffer, 'win1253');
+
+                    // Parse as JSON
+                    return JSON.parse(utf8String);
+                } catch (error) {
+                    console.error('Response transformation error:', error);
+                    // Fallback: try parsing as UTF-8
+                    try {
+                        const fallbackString = Buffer.from(data).toString('utf8');
+                        return JSON.parse(fallbackString);
+                    } catch (fallbackError) {
+                        throw new Error(`Failed to parse response: ${error.message}`);
+                    }
+                }
+            }]
         });
 
         if (!response.data.success && response.data.error) {
             throw new Error(`SoftOne API Error: ${response.data.error}`);
         }
-
-        // Convert character encoding from Windows-1253 to UTF-8
-        const convertedData = convertResponseEncoding(response.data);
-
-        console.log('📥 SoftOne API Response (UTF-8 converted):', method);
-
-        return convertedData;
+        return response.data;
     } catch (error) {
         throw new Error(`SoftOne API Error: ${error.message}`);
     }
@@ -152,6 +171,30 @@ server.tool("login",
                 username,
                 password,
                 appId: serviceAppId
+            }, {
+                responseType: 'arraybuffer', // Get raw bytes
+                decompress: true, // Let Axios handle gzip decompression
+                transformResponse: [(data) => {
+                    try {
+                        // Convert arraybuffer to Buffer
+                        const buffer = Buffer.from(data);
+
+                        // Decode Windows-1253 to UTF-8
+                        const utf8String = iconv.decode(buffer, 'win1253');
+
+                        // Parse as JSON
+                        return JSON.parse(utf8String);
+                    } catch (error) {
+                        console.error('Response transformation error:', error);
+                        // Fallback: try parsing as UTF-8
+                        try {
+                            const fallbackString = Buffer.from(data).toString('utf8');
+                            return JSON.parse(fallbackString);
+                        } catch (fallbackError) {
+                            throw new Error(`Failed to parse response: ${error.message}`);
+                        }
+                    }
+                }]
             });
 
             if (!loginResponse.data.success) {
