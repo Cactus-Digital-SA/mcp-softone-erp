@@ -12,24 +12,60 @@ A Model Context Protocol (MCP) server for integrating with SoftOne ERP API, prov
 - **Business Intelligence**: Built-in prompts for customer, sales, inventory, and financial analysis
 - **Resources**: Access to API documentation and database schema
 
-## Installation
+## Installation MCP SoftOne
 
-### Using npx (Recommended)
-```bash
-npx @cactus-digital-sa/mcp-softone-erp
+### Claude Desktop
+
+To use this with Claude Desktop, add the following to your claude_desktop_config.json. The full path on MacOS: ~/Library/Application\ Support/Claude/claude_desktop_config.json, on Windows: %APPDATA%/Claude/claude_desktop_config.json.
+
+```json
+{
+  "mcpServers": {
+    "softone-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@cactus-digital-sa/mcp-softone-erp"
+      ]
+    }
+  }
+}
 ```
 
-### Global Installation
-```bash
-npm install -g @cactus-digital-sa/mcp-softone-erp
+### VS Code
+Add this to your VS Code MCP config file. See VS Code MCP docs for more info.
+
+```json
+{
+  "servers": {
+    "softone-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@cactus-digital-sa/mcp-softone-erp"]
+    }
+  }
+}
+```
+
+### Cursor
+
+Install in Cursor
+Go to: Settings -> Cursor Settings -> MCP -> Add new global MCP server
+
+Pasting the following configuration into your Cursor ~/.cursor/mcp.json file is the recommended approach. You may also install in a specific project by creating .cursor/mcp.json in your project folder. See Cursor [MCP docs](https://docs.cursor.com/context/model-context-protocol) for more info.
+
+```json
+{
+  "mcpServers": {
+    "softone-mcp": {
+      "command": "npx",
+      "args": ["-y", "@cactus-digital-sa/mcp-softone-erp"]
+    }
+  }
+}
 ```
 
 ## Usage
-
-### Starting the Server
-```bash
-npx @cactus-digital-sa/mcp-softone-erp
-```
 
 ### Authentication
 First, authenticate with your SoftOne ERP system using the login tool:
@@ -120,35 +156,6 @@ The server connects to SoftOne ERP systems hosted at `https://{registeredName}.o
 - **password**: Your SoftOne Web Accounts password  
 - **appId**: Service ID defined in SoftOne Web Accounts
 
-## Examples
-
-### Customer Lookup
-```javascript
-// Search for customers containing "ACME" in code, name, or tax ID
-await lookupCustomer({ searchTerm: "ACME" });
-```
-
-### Sales Analysis
-```javascript
-// Get sales documents for date range
-await lookupSales({ 
-  dateFrom: "2024-01-01", 
-  dateTo: "2024-01-31",
-  customer: "CUST001" // optional
-});
-```
-
-### Data Discovery
-```javascript
-// Discover available objects
-await getObjects();
-
-// Get tables for customer object
-await getObjectTables({ object: "CUSTOMER" });
-
-// Get fields for customer main table
-await getTableFields({ object: "CUSTOMER", table: "CUSTOMER" });
-```
 
 ## Requirements
 
@@ -259,7 +266,7 @@ For issues and questions:
 
 ## Changelog
 
-### 1.0.0
+### 1.0.6
 - Initial release
 - Authentication and session management
 - Data discovery and retrieval tools

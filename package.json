@@ -1,6 +1,6 @@
 {
   "name": "@cactus-digital-sa/mcp-softone-erp",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "Model Context Protocol server for SoftOne ERP API integration",
   "main": "softone-erp-server.js",
   "type": "module",
