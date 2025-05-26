@@ -1,6 +1,6 @@
 {
   "name": "@cactus-digital-sa/mcp-softone-erp",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Model Context Protocol server for SoftOne ERP API integration",
   "main": "softone-erp-server.js",
   "type": "module",
@@ -16,11 +16,14 @@
     "LICENSE",
     "COMMERCIAL-LICENSE.md",
     "license-check.js",
-    "usage-analytics.js"
+    "usage-analytics.js",
+    "encoding-test.js"
   ],
   "scripts": {
     "start": "node softone-erp-server.js",
     "license-check": "node license-check.js",
+    "test-encoding": "node encoding-test.js",
+    "postinstall": "echo \"🔤 Greek character encoding (Windows-1253 → UTF-8) is enabled\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublishOnly": "echo \"Preparing for publish...\""
   },
@@ -39,7 +42,8 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
     "axios": "^1.9.0",
-    "zod": "^3.25.28"
+    "zod": "^3.25.28",
+    "iconv-lite": "^0.6.3"
   },
   "engines": {
     "node": ">=18.0.0"

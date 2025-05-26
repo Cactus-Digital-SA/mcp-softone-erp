@@ -5,6 +5,7 @@ A Model Context Protocol (MCP) server for integrating with SoftOne ERP API, prov
 ## Features
 
 - **Authentication**: Secure login and session management with SoftOne ERP
+- **Character Encoding**: Automatic Windows-1253 to UTF-8 conversion for Greek text
 - **Data Discovery**: Explore ERP objects, tables, and fields structure  
 - **Data Retrieval**: Get records, browse data lists, and generate reports
 - **Data Operations**: Insert, update, delete, and calculate ERP records
@@ -65,6 +66,29 @@ First, authenticate with your SoftOne ERP system using the login tool:
 #### Convenience Tools
 - `lookupCustomer` - Search customers by code, name, or tax ID
 - `lookupSales` - Search sales documents by date range and optional customer
+
+#### Debug Tools
+- `debugEncoding` - Test character encoding conversion (Windows-1253 → UTF-8)
+
+## Character Encoding
+
+The server automatically converts responses from **Windows-1253** (Greek encoding) to **UTF-8**, similar to PHP's:
+```php
+iconv('Windows-1253', "UTF-8//TRANSLIT//IGNORE", $text)
+```
+
+This ensures proper display of Greek characters in customer names, addresses, product descriptions, and other text fields from SoftOne ERP.
+
+### Testing Encoding
+You can test the encoding conversion with:
+```bash
+node encoding-test.js
+```
+
+Or use the debug tool:
+```javascript
+await debugEncoding({ testString: "Πελάτης" });
+```
 
 ### Available Resources
 

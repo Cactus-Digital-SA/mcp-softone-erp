@@ -6,6 +6,7 @@ import fs from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { analytics } from "./usage-analytics.js";
+import iconv from "iconv-lite";
 
 // Get the current directory
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -26,6 +27,60 @@ let erpApiBaseUrl = "";
 let clientID = "";
 let appId = "";
 
+// Character encoding conversion functions
+function convertFromWindows1253(text) {
+    if (typeof text !== 'string') return text;
+
+    try {
+        // Check if the text contains Greek characters that might be incorrectly encoded
+        // Convert from Windows-1253 to UTF-8 (equivalent to PHP's iconv)
+
+        // First, try to detect if the string is already UTF-8 or needs conversion
+        if (isValidUtf8(text)) {
+            return text; // Already UTF-8
+        }
+
+        // Convert from Windows-1253 to UTF-8
+        const buffer = Buffer.from(text, 'binary');
+        return iconv.decode(buffer, 'win1253');
+    } catch (error) {
+        console.warn('Character encoding conversion failed:', error.message);
+        return text; // Return original text if conversion fails
+    }
+}
+
+function isValidUtf8(str) {
+    try {
+        // Try to encode and decode - if it matches, it's valid UTF-8
+        return str === Buffer.from(str, 'utf8').toString('utf8');
+    } catch {
+        return false;
+    }
+}
+
+function convertResponseEncoding(obj) {
+    if (obj === null || obj === undefined) return obj;
+
+    if (typeof obj === 'string') {
+        return convertFromWindows1253(obj);
+    }
+
+    if (Array.isArray(obj)) {
+        return obj.map(item => convertResponseEncoding(item));
+    }
+
+    if (typeof obj === 'object') {
+        const converted = {};
+        for (const [key, value] of Object.entries(obj)) {
+            const convertedKey = convertFromWindows1253(key);
+            converted[convertedKey] = convertResponseEncoding(value);
+        }
+        return converted;
+    }
+
+    return obj;
+}
+
 // Utility function for ERP API calls
 async function callSoftOneApi(method, params = {}) {
     if (!clientID && method !== "login") {
@@ -38,14 +93,61 @@ async function callSoftOneApi(method, params = {}) {
             clientID: method !== "login" ? clientID : undefined,
             appId,
             ...params
+        }, {
+            // Configure axios to handle encoding properly
+            responseType: 'text',
+            responseEncoding: 'binary', // Get raw binary data first
+            transformResponse: [(data) => {
+                try {
+                    // Convert from Windows-1253 to UTF-8 at the HTTP response level
+                    const utf8Data = iconv.decode(Buffer.from(data, 'binary'), 'win1253');
+                    return JSON.parse(utf8Data);
+                } catch (parseError) {
+                    // If JSON parsing fails, try parsing the original data
+                    try {
+                        return JSON.parse(data);
+                    } catch (originalParseError) {
+                        console.warn('Failed to parse response as JSON:', originalParseError.message);
+                        return data; // Return raw data if JSON parsing fails
+                    }
+                }
+            }]
         });
 
         if (!response.data.success && response.data.error) {
             throw new Error(`SoftOne API Error: ${response.data.error}`);
         }
 
-        return response.data;
+        // Additional conversion for any remaining encoding issues
+        const convertedData = convertResponseEncoding(response.data);
+
+        console.log('📥 SoftOne API Response (UTF-8 converted):', method);
+
+        return convertedData;
     } catch (error) {
+        // If the custom encoding fails, try the standard approach
+        if (error.message.includes('JSON') || error.message.includes('parse')) {
+            try {
+                console.log('🔄 Retrying with standard encoding...');
+                const fallbackResponse = await axios.post(`${erpApiBaseUrl}/s1services`, {
+                    service: method,
+                    clientID: method !== "login" ? clientID : undefined,
+                    appId,
+                    ...params
+                });
+
+                if (!fallbackResponse.data.success && fallbackResponse.data.error) {
+                    throw new Error(`SoftOne API Error: ${fallbackResponse.data.error}`);
+                }
+
+                // Apply encoding conversion to the standard response
+                const convertedData = convertResponseEncoding(fallbackResponse.data);
+                return convertedData;
+            } catch (fallbackError) {
+                throw new Error(`SoftOne API Error: ${fallbackError.message}`);
+            }
+        }
+
         throw new Error(`SoftOne API Error: ${error.message}`);
     }
 }
@@ -320,6 +422,37 @@ server.tool("calculate",
 
 // CONVENIENCE TOOLS
 
+// Debug encoding tool
+server.tool("debugEncoding",
+    {
+        testString: z.string().describe("Test string to check encoding conversion")
+    },
+    async ({ testString }) => {
+        try {
+            const originalBytes = Buffer.from(testString, 'binary');
+            const convertedUtf8 = iconv.decode(originalBytes, 'win1253');
+
+            return {
+                content: [{
+                    type: "text",
+                    text: JSON.stringify({
+                        original: testString,
+                        originalBytes: Array.from(originalBytes),
+                        convertedUtf8: convertedUtf8,
+                        isValidUtf8Original: isValidUtf8(testString),
+                        isValidUtf8Converted: isValidUtf8(convertedUtf8)
+                    }, null, 2)
+                }]
+            };
+        } catch (error) {
+            return {
+                content: [{ type: "text", text: `Encoding debug error: ${error.message}` }],
+                isError: true
+            };
+        }
+    }
+);
+
 // Customer lookup
 server.tool("lookupCustomer",
     {
@@ -549,6 +682,7 @@ console.log("📚 For licensing details, see: LICENSE and COMMERCIAL-LICENSE.md"
 console.log("🌐 Visit: https://www.cactusweb.gr");
 console.log("🔍 License checker: npx softone-erp-license-check");
 console.log("📊 Analytics: Set DISABLE_ANALYTICS=true to opt out");
+console.log("🔤 Character Encoding: Windows-1253 → UTF-8 conversion enabled");
 console.log("---");*/
 
 // Track startup for license compliance (optional, can be disabled)
